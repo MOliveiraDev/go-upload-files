@@ -23,6 +23,7 @@ func Connect() (*sql.DB, error) {
 		sslmode = "disable"
 	}
 
+	// 2. Construir a string de conexão
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		host, port, user, password, dbname, sslmode)
 
