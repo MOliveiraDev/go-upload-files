@@ -6,15 +6,14 @@ import (
 	"github.com/google/uuid"
 )
 
-// VideoStatus representa os estados possíveis de um vídeo no sistema.
 type VideoStatus string
 
 const (
-	StatusUploaded   VideoStatus = "UPLOADED"   // Upload concluído
-	StatusProcessing VideoStatus = "PROCESSING" // Sendo transcodificado/comprimido
-	StatusReady      VideoStatus = "READY"      // Pronto para ser assistido/stream
-	StatusFailed     VideoStatus = "FAILED"     // Erro no processamento
-	StatusDeleted    VideoStatus = "DELETED"    // Vídeo apagado
+	StatusUploaded   VideoStatus = "UPLOADED"   
+	StatusProcessing VideoStatus = "PROCESSING" 
+	StatusReady      VideoStatus = "READY"      
+	StatusFailed     VideoStatus = "FAILED"    
+	StatusDeleted    VideoStatus = "DELETED"    
 )
 
 // Video metadata que será salva no banco de dados
