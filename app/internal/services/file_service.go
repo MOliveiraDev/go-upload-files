@@ -47,7 +47,6 @@ func (s *FileService) StartUpload(ctx context.Context, req dto.UploadFileRequest
 	fileID := uuid.New()
 
 	// Avisar a AWS/S3 que um arquivo grande está a caminho
-	// A chave (fileKey) é como o arquivo vai se chamar no bucket. Ex: "uploads/1234-5678.mp4"
 	fileKey := fmt.Sprintf("uploads/%s-%s", fileID.String(), req.Name)
 
 	uploadID, err := s.storage.InitMultipartUpload(ctx, fileKey)
