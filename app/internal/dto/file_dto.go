@@ -4,7 +4,6 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-// Inicia o validador para usarmos nas nossas requisições
 var Validate = validator.New()
 
 type UploadFileRequest struct {
@@ -13,7 +12,6 @@ type UploadFileRequest struct {
 	Size        int64  `json:"size" validate:"required,gt=0"`
 }
 
-// ValidateRequest é uma função helper para validar nossos DTOs
 func (req *UploadFileRequest) ValidateRequest() error {
 	return Validate.Struct(req)
 }

@@ -16,7 +16,6 @@ const (
 	StatusDeleted    FileStatus = "DELETED"    
 )
 	
-// Video metadata que será salva no banco de dados
 type File struct {
 	ID        uuid.UUID   `json:"id" db:"id"`
 	Name      string      `json:"name" db:"name"`
