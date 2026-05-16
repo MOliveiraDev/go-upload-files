@@ -1,4 +1,4 @@
-package storage
+package aws
 
 import (
 	"context"
@@ -12,7 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-// Nosso contrato (Interface) desenhado especificamente para o Multipart Upload que você citou
 type FileStorage interface {
 	InitMultipartUpload(ctx context.Context, fileKey string) (string, error)
 	UploadPart(ctx context.Context, fileKey, uploadID string, partNumber int32, chunk []byte) (string, error)
@@ -56,7 +55,6 @@ func NewS3Storage() (*S3Storage, error) {
 
 	// Inicializa de fato o Cliente S3
 	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
-		// UsePathStyle=true é um padrão muito importante se formos rodar um MinIO no Docker
 		o.UsePathStyle = true
 	})
 
