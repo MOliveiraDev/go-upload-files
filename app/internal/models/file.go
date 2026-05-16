@@ -19,6 +19,7 @@ const (
 type File struct {
 	ID        uuid.UUID   `json:"id" db:"id"`
 	Name      string      `json:"name" db:"name"`
+    FolderID  *uuid.UUID  `json:"folder_id" db:"folder_id"`
 	Type      string      `json:"type" db:"type"`             
 	Size      int64       `json:"size" db:"size"`             
 	Path      string      `json:"path" db:"path"`            
