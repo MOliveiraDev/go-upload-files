@@ -9,12 +9,13 @@ import (
 
 	"github.com/MOliveiraDev/go-upload-files/internal/dto"
 	"github.com/MOliveiraDev/go-upload-files/internal/models"
+	"github.com/MOliveiraDev/go-upload-files/internal/storage/aws"
 )
 
 type StorageManager interface {
 	InitMultipartUpload(ctx context.Context, fileKey string) (string, error)
 	UploadPart(ctx context.Context, fileKey, uploadID string, partNumber int32, chunk []byte) (string, error)
-	CompleteMultipartUpload(ctx context.Context, fileKey, uploadID string, parts dto.UploadFileRequest) error
+	CompleteMultipartUpload(ctx context.Context, fileKey, uploadID string, parts []aws.Part) error
 	AbortMultipartUpload(ctx context.Context, fileKey, uploadID string) error
 }
 
