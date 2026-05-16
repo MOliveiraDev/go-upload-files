@@ -60,18 +60,16 @@ func (s *FileService) StartUpload(ctx context.Context, req dto.UploadFileRequest
 		Name:      req.Name,
 		Type:      req.ContentType,
 		Size:      req.Size,
-		Path:      fileKey,                 // O caminho que nós ditamos para a AWS
-		Status:    models.StatusProcessing, // Começa como processando/em upload
+		Path:      fileKey,                 
+		Status:    models.StatusProcessing,
 		CreatedAt: time.Now(),
 	}
 
 	// Mandar nosso Repository salvar no Postgres
 	if err := s.repo.CreateFile(ctx, newFile); err != nil {
 		// Se der erro de banco de dados, devemos mandar a AWS cancelar a sessão (Abort) para não poluir
-		// s.storage.AbortMultipartUpload(ctx, fileKey, uploadID)
 		return nil, "", fmt.Errorf("falha ao salvar registro no banco de dados: %w", err)
 	}
 
-	// Devolver para o Handler os dados salvos e o uploadID
 	return newFile, uploadID, nil
 }
