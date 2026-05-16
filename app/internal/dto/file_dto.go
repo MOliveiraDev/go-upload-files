@@ -12,6 +12,11 @@ type UploadFileRequest struct {
 	Size        int64  `json:"size" validate:"required,gt=0"`
 }
 
+type Part struct {
+	PartNumber int32
+	ETag       string
+}
+
 func (req *UploadFileRequest) ValidateRequest() error {
 	return Validate.Struct(req)
 }
