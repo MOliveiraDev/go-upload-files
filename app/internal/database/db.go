@@ -1,12 +1,12 @@
 package database
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"os"
 
-	_ "github.com/lib/pq" // Driver do PostgreSQL
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func Connect() (*gorm.DB, error) {
@@ -21,18 +21,20 @@ func Connect() (*gorm.DB, error) {
 		sslmode = "disable"
 	}
 
-	// 2. Construir a string de conexão
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		host, port, user, password, dbname, sslmode)
 
-	// 3. Abrir a conexão
-	db, err := sql.Open("postgres", connStr)
+	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{})
 	if err != nil {
 		return nil, fmt.Errorf("erro ao abrir banco de dados: %w", err)
 	}
 
-	// 4. Testar a conexão de fato (Ping)
-	if err := db.Ping(); err != nil {
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, fmt.Errorf("erro ao obter pool sql do gorm: %w", err)
+	}
+
+	if err := sqlDB.Ping(); err != nil {
 		return nil, fmt.Errorf("erro ao fazer ping no banco: %w", err)
 	}
 
