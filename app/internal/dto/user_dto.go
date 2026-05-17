@@ -18,7 +18,7 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	JWT string `json:"jwt"`
+	Message string `json:"message"`
 }
 
 func (req *CreateUserRequest) ValidateRequest() error {
