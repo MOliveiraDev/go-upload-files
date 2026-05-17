@@ -9,6 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/MOliveiraDev/go-upload-files/internal/dto"
+	"github.com/MOliveiraDev/go-upload-files/internal/middleware"
 	"github.com/MOliveiraDev/go-upload-files/internal/models"
 	"github.com/MOliveiraDev/go-upload-files/internal/repositories"
 )
@@ -49,7 +50,6 @@ func (s *UserService) RegisterUser(ctx context.Context, req *dto.CreateUserReque
 }
 
 func (s *UserService) LoginUser(ctx context.Context, req *dto.LoginRequest) (*dto.LoginResponse, error) {
-
 	if err := req.ValidateRequest(); err != nil {
 		return nil, fmt.Errorf("dados de login inválidos: %w", err)
 	}
@@ -63,12 +63,14 @@ func (s *UserService) LoginUser(ctx context.Context, req *dto.LoginRequest) (*dt
 		[]byte(user.Password),
 		[]byte(req.Password),
 	)
-
 	if err != nil {
 		return nil, fmt.Errorf("email ou senha inválidos")
 	}
 
-	token := "jwt-token-aqui"
+	token, err := middleware.GenerateToken(user.ID, user.Email)
+	if err != nil {
+		return nil, fmt.Errorf("falha ao assinar token: %w", err)
+	}
 
 	return &dto.LoginResponse{
 		JWT: token,
