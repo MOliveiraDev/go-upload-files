@@ -7,7 +7,7 @@ import (
 	"github.com/MOliveiraDev/go-upload-files/internal/middleware"
 )
 
-// SetupAuthRoutes registra as rotas de autenticacao publica
+// SetupAuthRoutes registra as rotas sem necessidade de autenticação
 func SetupAuthRoutes(mux *http.ServeMux, authHandler *handlers.AuthHandler) {
 	mux.Handle("POST /auth/register", middleware.WrapErrorHandler(authHandler.Register))
 	mux.Handle("POST /auth/login", middleware.WrapErrorHandler(authHandler.Login))
@@ -15,7 +15,6 @@ func SetupAuthRoutes(mux *http.ServeMux, authHandler *handlers.AuthHandler) {
 
 // SetupFileRoutes registra todas as rotas relacionadas a arquivos
 func SetupFileRoutes(mux *http.ServeMux, fileHandler *handlers.FileHandler) {
-	// Padrão do próprio Go a partir da versão 1.22: "MÉTODO /caminho"
 	mux.Handle("POST /folders/{folderId}/files", middleware.AuthMiddleware(http.HandlerFunc(fileHandler.UploadFile)))
 
 	mux.Handle("GET /files", middleware.AuthMiddleware(http.HandlerFunc(fileHandler.ListFiles)))
