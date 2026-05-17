@@ -49,14 +49,14 @@ func (s *UserService) RegisterUser(ctx context.Context, req *dto.CreateUserReque
 	return newUser, nil
 }
 
-func (s *UserService) LoginUser(ctx context.Context, req *dto.LoginRequest) (*dto.LoginResponse, error) {
+func (s *UserService) LoginUser(ctx context.Context, req *dto.LoginRequest) (*dto.LoginResponse, string, error) {
 	if err := req.ValidateRequest(); err != nil {
-		return nil, fmt.Errorf("dados de login inválidos: %w", err)
+		return nil, "", fmt.Errorf("dados de login inválidos: %w", err)
 	}
 
 	user, err := s.repo.FindByEmail(ctx, req.Email)
 	if err != nil {
-		return nil, fmt.Errorf("email ou senha inválidos")
+		return nil, "", fmt.Errorf("email ou senha inválidos")
 	}
 
 	err = bcrypt.CompareHashAndPassword(
@@ -64,15 +64,15 @@ func (s *UserService) LoginUser(ctx context.Context, req *dto.LoginRequest) (*dt
 		[]byte(req.Password),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("email ou senha inválidos")
+		return nil, "", fmt.Errorf("email ou senha inválidos")
 	}
 
 	token, err := middleware.GenerateToken(user.ID, user.Email)
 	if err != nil {
-		return nil, fmt.Errorf("falha ao assinar token: %w", err)
+		return nil, "", fmt.Errorf("falha ao assinar token: %w", err)
 	}
 
 	return &dto.LoginResponse{
-		JWT: token,
-	}, nil
+		Message: "login feito com sucesso",
+	}, token, nil
 }
