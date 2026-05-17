@@ -12,6 +12,7 @@ import (
 	"github.com/MOliveiraDev/go-upload-files/api/routes"
 	"github.com/MOliveiraDev/go-upload-files/internal/database"
 	"github.com/MOliveiraDev/go-upload-files/internal/handlers"
+	"github.com/MOliveiraDev/go-upload-files/internal/middleware"
 	"github.com/MOliveiraDev/go-upload-files/internal/services"
 	"github.com/MOliveiraDev/go-upload-files/internal/storage/aws"
 	"github.com/joho/godotenv"
@@ -57,7 +58,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:         ":" + port,
-		Handler:      mux,
+		Handler:      middleware.ErrorMiddleware(mux),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  60 * time.Second,
