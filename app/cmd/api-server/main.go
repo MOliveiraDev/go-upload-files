@@ -13,6 +13,7 @@ import (
 	"github.com/MOliveiraDev/go-upload-files/internal/database"
 	"github.com/MOliveiraDev/go-upload-files/internal/handlers"
 	"github.com/MOliveiraDev/go-upload-files/internal/middleware"
+	"github.com/MOliveiraDev/go-upload-files/internal/repositories"
 	"github.com/MOliveiraDev/go-upload-files/internal/services"
 	"github.com/MOliveiraDev/go-upload-files/internal/storage/aws"
 	"github.com/joho/godotenv"
@@ -36,12 +37,21 @@ func main() {
 	if err != nil {
 		log.Fatalf("Falha ao inicializar o banco de dados: %v", err)
 	}
-	defer db.Close() 
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatalf("Falha ao obter pool SQL do GORM: %v", err)
+	}
+	defer sqlDB.Close()
 
 	storageClient, err := aws.NewS3Storage()
 	if err != nil {
 		log.Fatalf("Falha ao inicializar AWS S3: %v", err)
 	}
+
+	userRepository := repositories.NewUserRepository(db)
+	userService := services.NewUserService(userRepository)
+	authHandler := handlers.NewAuthHandler(userService)
 
 	fileService := services.NewFileService(storageClient, nil)
 	fileHandler := handlers.NewFileHandler(fileService)
@@ -53,6 +63,7 @@ func main() {
 		w.Write([]byte("OK"))
 	})
 
+	routes.SetupAuthRoutes(mux, authHandler)
 	routes.SetupFileRoutes(mux, fileHandler)
 	routes.SetupFolderRoutes(mux, folderHandler)
 
