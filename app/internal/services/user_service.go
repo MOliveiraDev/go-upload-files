@@ -14,6 +14,10 @@ import (
 	"github.com/MOliveiraDev/go-upload-files/internal/repositories"
 )
 
+const (
+	InvalidCredentialsMsg = "email ou senha inválidos"
+)
+
 type UserService struct {
 	repo repositories.UserRepository
 }
@@ -56,7 +60,10 @@ func (s *UserService) LoginUser(ctx context.Context, req *dto.LoginRequest) (*dt
 
 	user, err := s.repo.FindByEmail(ctx, req.Email)
 	if err != nil {
-		return nil, "", fmt.Errorf("email ou senha inválidos")
+		return nil, "", fmt.Errorf(InvalidCredentialsMsg)
+	}
+	if user == nil {
+		return nil, "", fmt.Errorf(InvalidCredentialsMsg)
 	}
 
 	err = bcrypt.CompareHashAndPassword(
@@ -64,7 +71,7 @@ func (s *UserService) LoginUser(ctx context.Context, req *dto.LoginRequest) (*dt
 		[]byte(req.Password),
 	)
 	if err != nil {
-		return nil, "", fmt.Errorf("email ou senha inválidos")
+		return nil, "", fmt.Errorf(InvalidCredentialsMsg)
 	}
 
 	token, err := middleware.GenerateToken(user.ID, user.Email)
