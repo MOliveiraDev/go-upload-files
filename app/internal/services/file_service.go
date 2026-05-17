@@ -9,6 +9,7 @@ import (
 
 	"github.com/MOliveiraDev/go-upload-files/internal/dto"
 	"github.com/MOliveiraDev/go-upload-files/internal/models"
+	"github.com/MOliveiraDev/go-upload-files/internal/repositories"
 	"github.com/MOliveiraDev/go-upload-files/internal/storage/aws"
 )
 
@@ -19,16 +20,12 @@ type StorageManager interface {
 	AbortMultipartUpload(ctx context.Context, fileKey, uploadID string) error
 }
 
-type FileRepository interface {
-	CreateFile(ctx context.Context, file *models.File) error
-}
-
 type FileService struct {
 	storage StorageManager
-	repo    FileRepository
+	repo    repositories.FileRepository
 }
 
-func NewFileService(storage StorageManager, repo FileRepository) *FileService {
+func NewFileService(storage StorageManager, repo repositories.FileRepository) *FileService {
 	return &FileService{
 		storage: storage,
 		repo:    repo,
@@ -55,12 +52,12 @@ func (s *FileService) StartUpload(ctx context.Context, req dto.UploadFileRequest
 	}
 
 	// Criar a entidade para o Banco de Dados
-	newFile := &models.File{ 
+	newFile := &models.File{
 		ID:        fileID,
 		Name:      req.Name,
 		Type:      req.ContentType,
 		Size:      req.Size,
-		Path:      fileKey,                 
+		Path:      fileKey,
 		Status:    models.StatusProcessing,
 		CreatedAt: time.Now(),
 	}

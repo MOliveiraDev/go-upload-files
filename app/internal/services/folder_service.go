@@ -8,19 +8,15 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/MOliveiraDev/go-upload-files/internal/models"
+	"github.com/MOliveiraDev/go-upload-files/internal/repositories"
 )
 
-type FolderRepository interface {
-	CreateFolder(ctx context.Context, folder *models.Folder) error
-	GetFolderByID(ctx context.Context, id uuid.UUID) (*models.Folder, error)
-}
-
 type FolderService struct {
-	repo FolderRepository
+	repo repositories.FolderRepository
 }
 
 // Construtor
-func NewFolderService(repo FolderRepository) *FolderService {
+func NewFolderService(repo repositories.FolderRepository) *FolderService {
 	return &FolderService{
 		repo: repo,
 	}
