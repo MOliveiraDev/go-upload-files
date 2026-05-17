@@ -9,9 +9,7 @@ import (
 	_ "github.com/lib/pq" // Driver do PostgreSQL
 )
 
-// Connect inicializa e retorna a conexão com o banco de dados
-func Connect() (*sql.DB, error) {
-	// 1. Resgatar as variáveis de ambiente
+func Connect() (*gorm.DB, error) {
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	user := os.Getenv("DB_USER")
