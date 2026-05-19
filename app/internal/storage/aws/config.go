@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
+	"github.com/MOliveiraDev/go-upload-files/internal/models"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -17,6 +19,7 @@ type FileStorage interface {
 	UploadPart(ctx context.Context, fileKey, uploadID string, partNumber int32, chunk []byte) (string, error)
 	CompleteMultipartUpload(ctx context.Context, fileKey, uploadID string, parts []Part) error
 	AbortMultipartUpload(ctx context.Context, fileKey, uploadID string) error
+	GetDownloadURL(file *models.File) string
 }
 
 // Struct genérica exigida pelo método "Complete" para juntar as partes
@@ -27,8 +30,10 @@ type Part struct {
 
 // S3Storage implementa a interface FileStorage usando a AWS SDK
 type S3Storage struct {
-	client *s3.Client
-	bucket string
+	client   *s3.Client
+	bucket   string
+	region   string
+	endpoint string
 }
 
 // NewS3Storage incializa a conexão lendo nossas variáveis de ambiente (.env)
@@ -61,7 +66,21 @@ func NewS3Storage() (*S3Storage, error) {
 	log.Println("S3 Storage Driver: Conectado e configurado com sucesso!")
 
 	return &S3Storage{
-		client: client,
-		bucket: bucket,
+		client:   client,
+		bucket:   bucket,
+		region:   region,
+		endpoint: endpoint,
 	}, nil
+}
+
+func (s *S3Storage) GetDownloadURL(file *models.File) string {
+	if file == nil || file.Path == "" || s == nil {
+		return ""
+	}
+
+	if trimmedEndpoint := strings.TrimRight(strings.TrimSpace(s.endpoint), "/"); trimmedEndpoint != "" {
+		return fmt.Sprintf("%s/%s/%s", trimmedEndpoint, s.bucket, file.Path)
+	}
+
+	return fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", s.bucket, s.region, file.Path)
 }
