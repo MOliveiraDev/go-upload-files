@@ -50,7 +50,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) error {
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) error {
 	if h.userService == nil {
-		return middleware.NewInternalError("O serviço de usuário não está configurado", errors.New("nil user service"))
+		return middleware.NewInternalError("o serviço de usuário não está configurado", errors.New("serviço de usuário nulo"))
 	}
 
 	var req dto.LoginRequest
