@@ -30,19 +30,17 @@ func SetupFileRoutes(mux *http.ServeMux, fileHandler *handlers.FileHandler) {
 
 // SetupFolderRoutes registra todas as rotas relacionadas a pastas
 func SetupFolderRoutes(mux *http.ServeMux, folderHandler *handlers.FolderHandler) {
-	mux.Handle("POST /folders", middleware.AuthMiddleware(http.HandlerFunc(folderHandler.CreateRootFolder)))
-	mux.Handle("POST /folders/{folderId}/children", middleware.AuthMiddleware(http.HandlerFunc(folderHandler.CreateSubfolder)))
-	mux.Handle("POST /folders/{folderId}/copy", middleware.AuthMiddleware(http.HandlerFunc(folderHandler.CopyFolder)))
+	mux.Handle("POST /folders", middleware.AuthMiddleware(middleware.WrapErrorHandler(folderHandler.CreateRootFolder)))
+	mux.Handle("POST /folders/{folderId}/children", middleware.AuthMiddleware(middleware.WrapErrorHandler(folderHandler.CreateSubfolder)))
 
-	mux.Handle("GET /folders", middleware.AuthMiddleware(http.HandlerFunc(folderHandler.ListFolders)))
-	mux.Handle("GET /folders/{folderId}", middleware.AuthMiddleware(http.HandlerFunc(folderHandler.GetFolder)))
-	mux.Handle("GET /folders/{folderId}/children", middleware.AuthMiddleware(http.HandlerFunc(folderHandler.ListSubfolders)))
-	mux.Handle("GET /folders/{folderId}/path", middleware.AuthMiddleware(http.HandlerFunc(folderHandler.GetFolderPath)))
-	mux.Handle("GET /folders/{folderId}/items", middleware.AuthMiddleware(http.HandlerFunc(folderHandler.GetFolderItems)))
+	mux.Handle("GET /folders", middleware.AuthMiddleware(middleware.WrapErrorHandler(folderHandler.ListFolders)))
+	mux.Handle("GET /folders/{folderId}", middleware.AuthMiddleware(middleware.WrapErrorHandler(folderHandler.GetFolder)))
+	mux.Handle("GET /folders/{folderId}/children", middleware.AuthMiddleware(middleware.WrapErrorHandler(folderHandler.ListSubfolders)))
+	mux.Handle("GET /folders/{folderId}/path", middleware.AuthMiddleware(middleware.WrapErrorHandler(folderHandler.GetFolderPath)))
+	mux.Handle("GET /folders/{folderId}/items", middleware.AuthMiddleware(middleware.WrapErrorHandler(folderHandler.GetFolderItems)))
 
-	mux.Handle("PATCH /folders/{folderId}/name", middleware.AuthMiddleware(http.HandlerFunc(folderHandler.RenameFolder)))
-	mux.Handle("PATCH /folders/{folderId}/metadata", middleware.AuthMiddleware(http.HandlerFunc(folderHandler.EditFolderMetadata)))
-	mux.Handle("PATCH /folders/{folderId}/parent", middleware.AuthMiddleware(http.HandlerFunc(folderHandler.MoveFolder)))
+	mux.Handle("PATCH /folders/{folderId}/name", middleware.AuthMiddleware(middleware.WrapErrorHandler(folderHandler.RenameFolder)))
+	mux.Handle("PATCH /folders/{folderId}/parent", middleware.AuthMiddleware(middleware.WrapErrorHandler(folderHandler.MoveFolder)))
 
-	mux.Handle("DELETE /folders/{folderId}", middleware.AuthMiddleware(http.HandlerFunc(folderHandler.DeleteFolders)))
+	mux.Handle("DELETE /folders/{folderId}", middleware.AuthMiddleware(middleware.WrapErrorHandler(folderHandler.DeleteFolder)))
 }
