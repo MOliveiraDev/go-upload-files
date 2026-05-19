@@ -53,9 +53,12 @@ func main() {
 	userService := services.NewUserService(userRepository)
 	authHandler := handlers.NewAuthHandler(userService)
 
+	folderRepository := repositories.NewFolderRepository(db)
+	folderService := services.NewFolderService(folderRepository)
+
 	fileService := services.NewFileService(storageClient, nil)
 	fileHandler := handlers.NewFileHandler(fileService)
-	folderHandler := handlers.NewFolderHandler()
+	folderHandler := handlers.NewFolderHandler(folderService)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
