@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	AuthCookieName = "auth_token"
+	AuthCookieName                    = "auth_token"
 	InvalidAuthenticationTokenMessage = "Token de autenticação inválido"
 )
 
@@ -52,6 +52,19 @@ func SetAuthCookie(w http.ResponseWriter, token string) {
 		SameSite: http.SameSiteStrictMode,
 		Secure:   shouldUseSecureCookie(),
 		MaxAge:   int((72 * time.Hour).Seconds()),
+	})
+}
+
+func ClearAuthCookie(w http.ResponseWriter) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     AuthCookieName,
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		Secure:   shouldUseSecureCookie(),
+		MaxAge:   -1,
+		Expires:  time.Unix(0, 0),
 	})
 }
 
