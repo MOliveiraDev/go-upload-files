@@ -16,16 +16,19 @@ func SetupAuthRoutes(mux *http.ServeMux, authHandler *handlers.AuthHandler) {
 
 // SetupFileRoutes registra todas as rotas relacionadas a arquivos
 func SetupFileRoutes(mux *http.ServeMux, fileHandler *handlers.FileHandler) {
+	mux.Handle("POST /files", middleware.AuthMiddleware(http.HandlerFunc(fileHandler.UploadFile)))
 	mux.Handle("POST /folders/{folderId}/files", middleware.AuthMiddleware(http.HandlerFunc(fileHandler.UploadFile)))
 
-	mux.Handle("GET /files", middleware.AuthMiddleware(http.HandlerFunc(fileHandler.ListFiles)))
-	mux.Handle("GET /folders/{folderId}/files", middleware.AuthMiddleware(http.HandlerFunc(fileHandler.ListFilesInFolder)))
+	mux.Handle("GET /files", middleware.AuthMiddleware(middleware.WrapErrorHandler(fileHandler.ListFiles)))
+	mux.Handle("GET /files/{fileId}", middleware.AuthMiddleware(middleware.WrapErrorHandler(fileHandler.GetFile)))
+	mux.Handle("GET /files/{fileId}/download", middleware.AuthMiddleware(middleware.WrapErrorHandler(fileHandler.GetDownloadURL)))
+	mux.Handle("GET /folders/{folderId}/files", middleware.AuthMiddleware(middleware.WrapErrorHandler(fileHandler.ListFilesInFolder)))
 
-	mux.Handle("PATCH /files/{fileId}/name", middleware.AuthMiddleware(http.HandlerFunc(fileHandler.RenameFile)))
-	mux.Handle("PATCH /files/{fileId}/metadata", middleware.AuthMiddleware(http.HandlerFunc(fileHandler.EditMetadata)))
-	mux.Handle("PATCH /files/{fileId}/folder", middleware.AuthMiddleware(http.HandlerFunc(fileHandler.MoveFile)))
+	mux.Handle("PATCH /files/{fileId}/name", middleware.AuthMiddleware(middleware.WrapErrorHandler(fileHandler.RenameFile)))
+	mux.Handle("PATCH /files/{fileId}/metadata", middleware.AuthMiddleware(middleware.WrapErrorHandler(fileHandler.EditMetadata)))
+	mux.Handle("PATCH /files/{fileId}/folder", middleware.AuthMiddleware(middleware.WrapErrorHandler(fileHandler.MoveFile)))
 
-	mux.Handle("DELETE /files", middleware.AuthMiddleware(http.HandlerFunc(fileHandler.DeleteFiles)))
+	mux.Handle("DELETE /files", middleware.AuthMiddleware(middleware.WrapErrorHandler(fileHandler.DeleteFiles)))
 }
 
 // SetupFolderRoutes registra todas as rotas relacionadas a pastas
