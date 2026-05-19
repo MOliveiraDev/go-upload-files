@@ -15,7 +15,7 @@ import (
 
 const (
 	AuthCookieName = "auth_token"
-	InvalidAuthenticationTokenMessage = "invalid authentication token"
+	InvalidAuthenticationTokenMessage = "Token de autenticação inválido"
 )
 
 type contextKey string
@@ -71,7 +71,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 		userIDValue, ok := claims["sub"].(string)
 		if !ok || userIDValue == "" {
-			WriteAppError(w, r, NewUnauthorizedError(InvalidAuthenticationTokenMessage, errors.New("missing sub claim")))
+			WriteAppError(w, r, NewUnauthorizedError(InvalidAuthenticationTokenMessage, errors.New("")))
 			return
 		}
 
@@ -110,7 +110,7 @@ func UserEmailFromContext(ctx context.Context) (string, bool) {
 
 func tokenFromRequestCookie(r *http.Request) (string, error) {
 	if r == nil {
-		return "", errors.New("request is nil")
+		return "", errors.New("requisição nula")
 	}
 
 	cookie, err := r.Cookie(AuthCookieName)
@@ -120,7 +120,7 @@ func tokenFromRequestCookie(r *http.Request) (string, error) {
 
 	token := strings.TrimSpace(cookie.Value)
 	if token == "" {
-		return "", errors.New("empty auth cookie")
+		return "", errors.New("cookie de autenticação vazio")
 	}
 
 	return token, nil
@@ -129,12 +129,12 @@ func tokenFromRequestCookie(r *http.Request) (string, error) {
 func parseToken(tokenString string) (jwt.MapClaims, error) {
 	secretKey := os.Getenv("JWT_SECRET")
 	if secretKey == "" {
-		return nil, errors.New("jwt secret key not configured")
+		return nil, errors.New("chave de autenticação não encontrada")
 	}
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if token.Method != jwt.SigningMethodHS256 {
-			return nil, fmt.Errorf("unexpected signing method: %s", token.Method.Alg())
+			return nil, fmt.Errorf("método de assinatura inesperado: %s", token.Method.Alg())
 		}
 
 		return []byte(secretKey), nil
@@ -145,7 +145,7 @@ func parseToken(tokenString string) (jwt.MapClaims, error) {
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || !token.Valid {
-		return nil, errors.New("invalid token claims")
+		return nil, errors.New("reivindicações do token inválidas")
 	}
 
 	return claims, nil
