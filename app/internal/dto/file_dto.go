@@ -1,22 +1,29 @@
 package dto
 
-import (
-	"github.com/go-playground/validator/v10"
-)
+import "github.com/go-playground/validator/v10"
 
 var Validate = validator.New()
 
-type UploadFileRequest struct {
-	Name        string `json:"name" validate:"required,min=3,max=100"`
-	ContentType string `json:"content_type" validate:"required,oneof=video/mp4 video/x-matroska video/quicktime"` // Aceita mp4, mkv, mov
-	Size        int64  `json:"size" validate:"required,gt=0"`
+type InitUploadRequest struct {
+	Name        string  `json:"name" validate:"required,min=1,max=255"`
+	ContentType string  `json:"contentType" validate:"required"`
+	Size        int64   `json:"size" validate:"required,gt=0"`
+	FolderID    *string `json:"folderId"`
 }
 
-type Part struct {
-	PartNumber int32
-	ETag       string
+type CompleteUploadRequest struct {
+	Parts []UploadedPart `json:"parts" validate:"required,min=1,dive"`
 }
 
-func (req *UploadFileRequest) ValidateRequest() error {
+type UploadedPart struct {
+	PartNumber int32  `json:"partNumber" validate:"required,gt=0"`
+	ETag       string `json:"etag" validate:"required"`
+}
+
+func (req *InitUploadRequest) ValidateRequest() error {
+	return Validate.Struct(req)
+}
+
+func (req *CompleteUploadRequest) ValidateRequest() error {
 	return Validate.Struct(req)
 }
