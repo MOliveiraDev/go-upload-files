@@ -56,7 +56,8 @@ func main() {
 	folderRepository := repositories.NewFolderRepository(db)
 	folderService := services.NewFolderService(folderRepository)
 
-	fileService := services.NewFileService(storageClient, nil)
+	fileRepository := repositories.NewFileRepository(db)
+	fileService := services.NewFileService(storageClient, fileRepository, folderRepository)
 	fileHandler := handlers.NewFileHandler(fileService)
 	folderHandler := handlers.NewFolderHandler(folderService)
 
