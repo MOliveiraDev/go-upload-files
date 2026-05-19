@@ -18,8 +18,6 @@ const (
 	CodeNotFound     = "NOT_FOUND"
 	CodeConflict     = "CONFLICT"
 	CodeInternal     = "INTERNAL_SERVER_ERROR"
-
-	MessageInternalServerError = "internal server error"
 )
 
 type AppError struct {
@@ -157,7 +155,7 @@ func ErrorMiddleware(next http.Handler) http.Handler {
 					slog.String("stack", string(debug.Stack())),
 				)
 
-				WriteAppErrorWithLogger(rw, r, NewInternalError(MessageInternalServerError, err), logger)
+				WriteAppErrorWithLogger(rw, r, NewInternalError(CodeInternal, err), logger)
 				return
 			}
 
@@ -206,7 +204,7 @@ func WriteAppErrorWithLogger(w http.ResponseWriter, r *http.Request, err error, 
 
 func normalizeError(err error) *AppError {
 	if err == nil {
-		return NewInternalError(MessageInternalServerError, nil)
+		return NewInternalError(CodeInternal, nil)
 	}
 
 	var appErr *AppError
@@ -214,7 +212,7 @@ func normalizeError(err error) *AppError {
 		return appErr
 	}
 
-	return NewInternalError(MessageInternalServerError, err)
+	return NewInternalError(CodeInternal, err)
 }
 
 func writeJSONError(w http.ResponseWriter, status int, code, message string) {
@@ -231,7 +229,7 @@ func writeJSONError(w http.ResponseWriter, status int, code, message string) {
 	if err := json.NewEncoder(w).Encode(payload); err != nil {
 		http.Error(
 			w,
-			fmt.Sprintf(`{"error":{"code":"%s","message":"%s"}}`, CodeInternal, MessageInternalServerError),
+			fmt.Sprintf(`{"error":{"code":"%s","message":"%s"}}`, CodeInternal, CodeInternal),
 			http.StatusInternalServerError,
 		)
 	}
