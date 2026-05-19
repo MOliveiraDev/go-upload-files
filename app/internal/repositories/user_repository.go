@@ -5,8 +5,11 @@ import (
 	"errors"
 
 	"github.com/MOliveiraDev/go-upload-files/internal/models"
+	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 )
+
+var ErrUserEmailAlreadyExists = errors.New("email já registrado")
 
 type UserRepository interface {
 	CreateUser(ctx context.Context, user *models.User) error
@@ -26,7 +29,17 @@ func (r *userRepository) CreateUser(ctx context.Context, user *models.User) erro
 		return errors.New("Conexão com o banco de dados não configurada")
 	}
 
-	return r.db.WithContext(ctx).Create(user).Error
+	err := r.db.WithContext(ctx).Create(user).Error
+	if err == nil {
+		return nil
+	}
+
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+		return ErrUserEmailAlreadyExists
+	}
+
+	return err
 }
 
 func (r *userRepository) FindByEmail(ctx context.Context, email string) (*models.User, error) {

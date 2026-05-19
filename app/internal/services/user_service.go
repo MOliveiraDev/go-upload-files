@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -17,6 +18,8 @@ import (
 const (
 	InvalidCredentialsMsg = "email ou senha inválidos"
 )
+
+var ErrUserEmailAlreadyExists = errors.New("email já registrado")
 
 type UserService struct {
 	repo repositories.UserRepository
@@ -47,6 +50,10 @@ func (s *UserService) RegisterUser(ctx context.Context, req *dto.CreateUserReque
 	}
 
 	if err := s.repo.CreateUser(ctx, newUser); err != nil {
+		if errors.Is(err, repositories.ErrUserEmailAlreadyExists) {
+			return nil, ErrUserEmailAlreadyExists
+		}
+
 		return nil, fmt.Errorf("falha ao salvar usuário no banco de dados: %w", err)
 	}
 

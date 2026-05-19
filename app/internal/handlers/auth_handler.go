@@ -30,6 +30,10 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) error {
 
 	user, err := h.userService.RegisterUser(r.Context(), &req)
 	if err != nil {
+		if errors.Is(err, services.ErrUserEmailAlreadyExists) {
+			return middleware.NewConflictError("email already registered", err)
+		}
+
 		return middleware.NewBadRequestError("failed to register user", err)
 	}
 
