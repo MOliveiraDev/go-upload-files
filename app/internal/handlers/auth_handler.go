@@ -20,21 +20,21 @@ func NewAuthHandler(userService *services.UserService) *AuthHandler {
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) error {
 	if h.userService == nil {
-		return middleware.NewInternalError("user service is not configured", errors.New("nil user service"))
+		return middleware.NewInternalError("O serviço de usuário não está configurado", errors.New("service de usuário nulo"))
 	}
 
 	var req dto.CreateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		return middleware.NewBadRequestError("invalid request body", err)
+		return middleware.NewBadRequestError("corpo da requisição inválido", err)
 	}
 
 	user, err := h.userService.RegisterUser(r.Context(), &req)
 	if err != nil {
 		if errors.Is(err, services.ErrUserEmailAlreadyExists) {
-			return middleware.NewConflictError("email already registered", err)
+			return middleware.NewConflictError("email já cadastrado", err)
 		}
 
-		return middleware.NewBadRequestError("failed to register user", err)
+		return middleware.NewBadRequestError("falha ao registrar usuário", err)
 	}
 
 	writeJSON(w, http.StatusCreated, map[string]any{
@@ -50,22 +50,33 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) error {
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) error {
 	if h.userService == nil {
-		return middleware.NewInternalError("user service is not configured", errors.New("nil user service"))
+		return middleware.NewInternalError("O serviço de usuário não está configurado", errors.New("nil user service"))
 	}
 
 	var req dto.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		return middleware.NewBadRequestError("invalid request body", err)
+		return middleware.NewBadRequestError("corpo da requisição inválido", err)
 	}
 
 	response, token, err := h.userService.LoginUser(r.Context(), &req)
 	if err != nil {
-		return middleware.NewUnauthorizedError("invalid email or password", err)
+		return middleware.NewUnauthorizedError("email ou senha inválidos", err)
 	}
 
 	middleware.SetAuthCookie(w, token)
 	writeJSON(w, http.StatusOK, map[string]any{
 		"data": response,
+	})
+
+	return nil
+}
+
+func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) error {
+	middleware.ClearAuthCookie(w)
+	writeJSON(w, http.StatusOK, map[string]any{
+		"data": map[string]string{
+			"message": "logout feito com sucesso",
+		},
 	})
 
 	return nil

@@ -11,6 +11,7 @@ import (
 func SetupAuthRoutes(mux *http.ServeMux, authHandler *handlers.AuthHandler) {
 	mux.Handle("POST /auth/register", middleware.WrapErrorHandler(authHandler.Register))
 	mux.Handle("POST /auth/login", middleware.WrapErrorHandler(authHandler.Login))
+	mux.Handle("POST /auth/logout", middleware.WrapErrorHandler(authHandler.Logout))
 }
 
 // SetupFileRoutes registra todas as rotas relacionadas a arquivos
