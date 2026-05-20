@@ -13,6 +13,7 @@ import (
 	"github.com/MOliveiraDev/go-upload-files/internal/database"
 	"github.com/MOliveiraDev/go-upload-files/internal/handlers"
 	"github.com/MOliveiraDev/go-upload-files/internal/middleware"
+	"github.com/MOliveiraDev/go-upload-files/internal/models"
 	"github.com/MOliveiraDev/go-upload-files/internal/repositories"
 	"github.com/MOliveiraDev/go-upload-files/internal/services"
 	"github.com/MOliveiraDev/go-upload-files/internal/storage/aws"
@@ -38,6 +39,10 @@ func main() {
 		log.Fatalf("Falha ao inicializar o banco de dados: %v", err)
 	}
 
+	if err := db.AutoMigrate(&models.User{}, &models.Folder{}, &models.File{}, &models.UploadSession{}); err != nil {
+		log.Fatalf("Falha ao sincronizar schema do banco: %v", err)
+	}
+
 	sqlDB, err := db.DB()
 	if err != nil {
 		log.Fatalf("Falha ao obter pool SQL do GORM: %v", err)
@@ -57,7 +62,8 @@ func main() {
 	folderService := services.NewFolderService(folderRepository)
 
 	fileRepository := repositories.NewFileRepository(db)
-	fileService := services.NewFileService(storageClient, fileRepository, folderRepository)
+	uploadRepository := repositories.NewUploadSessionRepository(db)
+	fileService := services.NewFileService(storageClient, fileRepository, folderRepository, uploadRepository)
 	fileHandler := handlers.NewFileHandler(fileService)
 	folderHandler := handlers.NewFolderHandler(folderService)
 
