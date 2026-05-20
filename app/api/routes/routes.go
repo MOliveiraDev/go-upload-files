@@ -16,8 +16,10 @@ func SetupAuthRoutes(mux *http.ServeMux, authHandler *handlers.AuthHandler) {
 
 // SetupFileRoutes registra todas as rotas relacionadas a arquivos
 func SetupFileRoutes(mux *http.ServeMux, fileHandler *handlers.FileHandler) {
-	mux.Handle("POST /files", middleware.AuthMiddleware(http.HandlerFunc(fileHandler.UploadFile)))
-	mux.Handle("POST /folders/{folderId}/files", middleware.AuthMiddleware(http.HandlerFunc(fileHandler.UploadFile)))
+	mux.Handle("POST /uploads/init", middleware.AuthMiddleware(middleware.WrapErrorHandler(fileHandler.InitUpload)))
+	mux.Handle("PUT /uploads/{uploadId}/parts/{partNumber}", middleware.AuthMiddleware(middleware.WrapErrorHandler(fileHandler.UploadPart)))
+	mux.Handle("POST /uploads/{uploadId}/complete", middleware.AuthMiddleware(middleware.WrapErrorHandler(fileHandler.CompleteUpload)))
+	mux.Handle("DELETE /uploads/{uploadId}", middleware.AuthMiddleware(middleware.WrapErrorHandler(fileHandler.AbortUpload)))
 
 	mux.Handle("GET /files", middleware.AuthMiddleware(middleware.WrapErrorHandler(fileHandler.ListFiles)))
 	mux.Handle("GET /files/{fileId}", middleware.AuthMiddleware(middleware.WrapErrorHandler(fileHandler.GetFile)))
