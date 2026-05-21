@@ -39,7 +39,7 @@ type FileStorage interface {
 	UploadPart(ctx context.Context, fileKey, uploadID string, partNumber int32, chunk []byte) (string, error)
 	CompleteMultipartUpload(ctx context.Context, fileKey, uploadID string, parts []aws.Part) error
 	AbortMultipartUpload(ctx context.Context, fileKey, uploadID string) error
-	GetDownloadURL(file *models.File) string
+	GetDownloadURL(ctx context.Context, file *models.File, expires time.Duration) (string, error)
 }
 
 type FileService struct {
@@ -325,17 +325,13 @@ func (s *FileService) GetDownloadURL(ctx context.Context, ownerID, fileID uuid.U
 		return "", nil, err
 	}
 
-	if file.URL != "" {
-		return file.URL, file, nil
-	}
-
 	if s.storage == nil {
 		return "", nil, errors.New("storage não configurado")
 	}
 
-	downloadURL := s.storage.GetDownloadURL(file)
-	if downloadURL == "" {
-		return "", nil, errors.New("não foi possível gerar a url de download")
+	downloadURL, err := s.storage.GetDownloadURL(ctx, file, 10*time.Minute)
+	if err != nil {
+		return "", nil, fmt.Errorf("gerar URL de download: %w", err)
 	}
 
 	return downloadURL, file, nil
