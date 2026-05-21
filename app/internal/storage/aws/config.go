@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
+	"time"
 
 	"github.com/MOliveiraDev/go-upload-files/internal/models"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -19,7 +19,7 @@ type FileStorage interface {
 	UploadPart(ctx context.Context, fileKey, uploadID string, partNumber int32, chunk []byte) (string, error)
 	CompleteMultipartUpload(ctx context.Context, fileKey, uploadID string, parts []Part) error
 	AbortMultipartUpload(ctx context.Context, fileKey, uploadID string) error
-	GetDownloadURL(file *models.File) string
+	GetDownloadURL(ctx context.Context, file *models.File, expires time.Duration) (string, error)
 }
 
 // Struct genérica exigida pelo método "Complete" para juntar as partes
@@ -73,14 +73,20 @@ func NewS3Storage() (*S3Storage, error) {
 	}, nil
 }
 
-func (s *S3Storage) GetDownloadURL(file *models.File) string {
-	if file == nil || file.Path == "" || s == nil {
-		return ""
+func (s *S3Storage) GetDownloadURL(ctx context.Context, file *models.File, expires time.Duration) (string, error) {
+	if file == nil || file.Path == "" {
+		return "", fmt.Errorf("arquivo inválido para geração de URL")
 	}
 
-	if trimmedEndpoint := strings.TrimRight(strings.TrimSpace(s.endpoint), "/"); trimmedEndpoint != "" {
-		return fmt.Sprintf("%s/%s/%s", trimmedEndpoint, s.bucket, file.Path)
+	presignClient := s3.NewPresignClient(s.client)
+
+	req, err := presignClient.PresignGetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(file.Path),
+	}, s3.WithPresignExpires(expires))
+	if err != nil {
+		return "", fmt.Errorf("gerar URL assinada: %w", err)
 	}
 
-	return fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", s.bucket, s.region, file.Path)
+	return req.URL, nil
 }
