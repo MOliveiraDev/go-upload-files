@@ -49,7 +49,7 @@ func SetAuthCookie(w http.ResponseWriter, token string) {
 		Value:    token,
 		Path:     "/",
 		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteLaxMode,
 		Secure:   shouldUseSecureCookie(),
 		MaxAge:   int((72 * time.Hour).Seconds()),
 	})
@@ -61,7 +61,7 @@ func ClearAuthCookie(w http.ResponseWriter) {
 		Value:    "",
 		Path:     "/",
 		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteLaxMode,
 		Secure:   shouldUseSecureCookie(),
 		MaxAge:   -1,
 		Expires:  time.Unix(0, 0),
