@@ -79,7 +79,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:         ":" + port,
-		Handler:      middleware.ErrorMiddleware(mux),
+		Handler:      middleware.CORSMiddleware(middleware.ErrorMiddleware(mux)),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  60 * time.Second,
