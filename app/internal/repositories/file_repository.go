@@ -104,6 +104,8 @@ func (r *fileRepository) ListFiles(ctx context.Context, ownerID uuid.UUID, filte
 	}
 	if trimmedStatus := strings.TrimSpace(filter.Status); trimmedStatus != "" {
 		query = query.Where("status = ?", trimmedStatus)
+	} else {
+		query = query.Where("status NOT IN ?", []string{string(models.StatusFailed), string(models.StatusDeleted)})
 	}
 	if filter.UploadedFrom != nil {
 		query = query.Where("created_at >= ?", *filter.UploadedFrom)
