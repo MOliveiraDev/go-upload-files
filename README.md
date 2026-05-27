@@ -17,6 +17,20 @@ O projeto expõe uma API HTTP RESTful que cobre autenticação de usuários, ger
 
 ---
 
+## Fluxo de Arquivos
+
+![Fluxo de upload e download](assets/Fluxo%20go-upload-files.jpg)
+
+### 1. Upload de Arquivo
+
+O usuário inicia o processo chamando `POST /uploads/init`, que registra a sessão de upload. A API então envia o arquivo em partes diretamente para o **AWS S3** usando o protocolo multipart — ideal para arquivos grandes, pois cada parte é enviada de forma independente e pode ser retomada em caso de falha. Após a conclusão (`POST /uploads/{id}/complete`), os metadados do arquivo (nome, tamanho, tipo, localização no S3) são persistidos no **PostgreSQL**.
+
+### 2. Download de Arquivo
+
+O usuário solicita o download via `GET /files/{id}/download`. A API consulta o PostgreSQL para validar que o arquivo existe e pertence ao usuário, depois gera uma **URL assinada temporária** diretamente no AWS S3. Essa URL é retornada ao usuário, que faz o download direto do S3 sem passar pelo servidor — reduzindo latência e consumo de banda da API.
+
+---
+
 ## Arquitetura
 
 ```
